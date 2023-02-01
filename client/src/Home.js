@@ -26,7 +26,8 @@ import VoteArea from "./components/VoteArea"
 import VoterRegistration from "./components/VoterRegistration"
 import ChangePhase from "./components/ChangePhase";
 import { AuthContext } from "./context/AuthContext"
-import Loader from "./components/Loader"
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
 
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
@@ -66,7 +67,7 @@ const components = {
 
 
 function Home() {
-  const {account } = useContext(AuthContext);
+  const { account, currentUser } = useContext(AuthContext);
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [component, setComponent] = useState(1);
@@ -208,7 +209,7 @@ function Home() {
                   <div>
                     <Menu.Button className="flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                       <span className="sr-only">Open user menu</span>
-                      <Avatar name="Ethereum Wallet" size={40} round={20} />
+                      <Avatar onClick={() => signOut(auth)} name={currentUser?.displayName} size={40} round={20} />
                     </Menu.Button>
                   </div>
                   {/* <Transition

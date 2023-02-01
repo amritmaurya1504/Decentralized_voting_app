@@ -1,17 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../context/AuthContext'
 import img from "../img/Poll.gif"
+import Loader from './Loader';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const VoteArea = () => {
   const { provider, contract } = useContext(AuthContext);
   const [candidates, setCandidates] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const getCandidates = async () => {
       try {
         const signer = contract.connect(provider.getSigner());
         const cand = await signer.getCandidate();
-        console.log(cand);
+        // console.log(cand);
         setCandidates(cand);
       } catch (error) {
         console.log(error)
@@ -19,8 +23,43 @@ const VoteArea = () => {
     }
     getCandidates();
   }, [])
+
+
+  const addYourVote = async (candidate_id) => {
+    try {
+      setIsLoading(true);
+      const signer = contract.connect(provider.getSigner());
+      const res = await signer.addVote(candidate_id);
+      setIsLoading(false);
+      toast.success('You casted your vote !', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+    });
+    } catch (error) {
+      setIsLoading(false);
+      toast.error(error.data.message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+    });
+    }
+  }
+
   return (
     <div>
+      <ToastContainer />
+      {isLoading && <Loader />}
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
@@ -49,6 +88,7 @@ const VoteArea = () => {
                       </p>
                       <button
                         type="button"
+                        onClick={() => addYourVote(item.candidate_id.toNumber())}
                         className="mt-5 inline-flex items-center rounded border border-transparent bg-white border-[#3ed0d9] px-5 py-1.5 text-xs font-medium text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3ed0d9] focus:ring-offset-2"
                       >
                         <span className='text-lg font-semibold'>Vote</span>
@@ -62,6 +102,7 @@ const VoteArea = () => {
               )
             })
           }
+          {candidates?.length == 0 && <p>Voting is not started !</p>}
         </div>
       </div>
     </div >

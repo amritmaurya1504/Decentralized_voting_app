@@ -66,7 +66,7 @@ const AdminComponent = ({ contract, provider }) => {
       try {
         const signer = contract.connect(provider.getSigner());
         const cand = await signer.getCandidate();
-        console.log(cand);
+        // console.log(cand);
         setCandidates(cand);
       } catch (error) {
         console.log(error)

@@ -4,7 +4,7 @@ pragma solidity >=0.5.0 <0.9.0;
 
 contract OnlineVoting {
     // contract owner;
-    address owner;
+    address private owner;
 
     constructor() {
         owner = msg.sender;
@@ -22,13 +22,13 @@ contract OnlineVoting {
     }
 
     // total voters array
-    address[] public votersArr;
+    address[] private votersArr;
 
     // Store account that have voted;
     mapping(address => bool) private voters;
     // Fetch candidates using mapping key=>value
-    mapping(uint256 => Candidate) public candidate;
-    uint256 public candidateCount = 0;
+    mapping(uint256 => Candidate) private candidate;
+    uint256 private candidateCount = 0;
 
     // events
     event votedEvent(uint256 indexed _candidateId);
@@ -36,6 +36,9 @@ contract OnlineVoting {
 
     // WinnerId;
     uint256 private winnerId;
+
+    // is Result declared or not
+    bool private isResultDeclared;
 
     function addCandidate(
         string memory _name,
@@ -64,7 +67,7 @@ contract OnlineVoting {
 
         // require a valid candidate
         require(
-            _candidateId > 0 && _candidateId <= candidateCount,
+            _candidateId >= 0 && _candidateId <= candidateCount,
             "Invalid candidate!"
         );
 
@@ -81,19 +84,19 @@ contract OnlineVoting {
         emit votedEvent(_candidateId);
     }
 
-    function findMaxVoteCandidate() public {
+    function findMaxVoteCandidate() public{
         require(msg.sender == owner, "You don't have the access");
         uint256 max = 0;
-        for (uint256 i = 1; i <= candidateCount; i++) {
+        for (uint256 i = 0; i < candidateCount; i++) {
             if (candidate[i].candidate_voteCount > max) {
                 max = candidate[i].candidate_voteCount;
                 winnerId = i;
+                isResultDeclared = true;
             }
         }
     }
 
     function getWinner() public view returns (Candidate memory) {
-        require(msg.sender == owner, "You don't have the access");
         return candidate[winnerId];
     }
 
@@ -111,6 +114,14 @@ contract OnlineVoting {
 
     function getOwner() public view returns(address) {
         return owner;
+    }
+
+    function getVoters() public view returns(address[] memory){
+        return votersArr;
+    }
+
+    function resultStatus() public view returns (bool){
+        return isResultDeclared;
     }
 
 }

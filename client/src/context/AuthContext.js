@@ -1,6 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import OnlineVoting from "../artifacts/contracts/OnlineVoting.sol/OnlineVoting.json"
 import { ethers } from "ethers"
+import { auth } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const AuthContext = createContext();
 
@@ -10,6 +12,7 @@ export const AuthContextProvider = ({ children }) => {
     const [contract, setContract] = useState(null);
     const [provider, setProvider] = useState(null);
     const [connected, setConnected] = useState(false)
+    const [currentUser, setCurrentUser] = useState()
 
     useEffect(() => {
         const connectAccount = () => {
@@ -24,18 +27,18 @@ export const AuthContextProvider = ({ children }) => {
                     window.ethereum.on("accountsChanged", () => {
                         window.location.reload();
                     });
-                    
+
                     await provider.send("eth_requestAccounts", [])
                     const signer = provider.getSigner();
                     const address = await signer.getAddress();
                     setAccount(address);
-                    let contractAddress = "0x5F6444e4F42543B1197FFb0A13D0080424f4453f";
+                    let contractAddress = "0xcC4358E502c270F325559380A21f8351FC2eeF39";
 
                     const contract = new ethers.Contract(
                         contractAddress, OnlineVoting.abi, signer
                     )
                     // get all candidates;
-                    console.log(contract)
+                    // console.log(contract)
                     const ownerSigner = contract.connect(provider.getSigner());
                     const admin = await ownerSigner.getOwner();
                     console.log("owner", admin);
@@ -53,9 +56,20 @@ export const AuthContextProvider = ({ children }) => {
         connectAccount();
     }, [])
 
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+            console.log(user)
+        });
+
+        return () => {
+            unsub();
+        };
+    }, []);
+
 
     return (
-        <AuthContext.Provider value={{ connected, contract, account, provider, adminAccount }}>
+        <AuthContext.Provider value={{ connected, contract, account, provider, adminAccount, setCurrentUser, currentUser }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react'
-import axios from "axios"
 import { AuthContext } from '../context/AuthContext';
 import Loader from './Loader';
 import { ToastContainer, toast } from 'react-toastify';
@@ -31,8 +30,6 @@ const AddCandidate = () => {
         cPic: "",
         pPic: "",
     })
-    let partyLogo;
-    let candidatePic;
 
     const fieldValidation = () => {
         if (!values.name || !values.partyName || !values.age) {
@@ -62,7 +59,7 @@ const AddCandidate = () => {
             setIsLoading(true);
             const signer = contract.connect(provider.getSigner());
             const res = await signer.addCandidate(values.name, values.age, values.partyName, values.pPic, values.cPic);
-            console.log(res)
+            // console.log(res)
             toast.success('Candidate added succesfully!', {
                 position: "top-right",
                 autoClose: 3000,
